@@ -37,7 +37,7 @@ class CreateQuote(Command):
         try:
             self.bot.log.info("Executing Create Quote")
             name = resolve_alias(self.bot.db, self.cmd_args['user'])
-            name = resolve_full(self.bot.db, name).lower()
+            name = resolve_full(self.bot.db, name)
             if name not in self.bot.last_message.keys():
                 self.bot.say("I don't know what they said.")
                 return
