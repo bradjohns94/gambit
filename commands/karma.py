@@ -468,6 +468,6 @@ class DisableKarma(Command):
             self.bot.log.info("Executing Disable Karma")
             if self.bot.karma[self.bot.conversation.id_]:
                 self.bot.say("Disabling karma...")
-            self.bot.karma[bot.conversation.id_] = False
+            self.bot.karma[self.bot.conversation.id_] = False
         except Exception as error:
             self.bot.log.warn("Error in Disable Karma:\n{}".format(error))
