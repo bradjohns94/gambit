@@ -129,7 +129,7 @@ class ChangeKarma(Command):
         if user_name in self.tokens.keys():
             last_change = self.tokens[user_name][0]
             # Add 1 token for every 30 seconds from the last change
-            added_tokens = (update_time - last_change) / float(30)
+            added_tokens = int((update_time - last_change) / 30)
             self.tokens[user_name][1] += added_tokens
             # Max at 5 self.tokens
             if self.tokens[user_name][1] > 5:
@@ -139,9 +139,8 @@ class ChangeKarma(Command):
             self.tokens[user_name] = [update_time, 5] # Start with 5 self.tokens
         if self.tokens[user_name][1] <= 0:
             return False
-        else:
-            self.tokens[user_name][1] -= 1
-            return True
+        self.tokens[user_name][1] -= 1
+        return True
 
 
 class GetKarma(Command):
