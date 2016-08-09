@@ -84,9 +84,10 @@ class PlayHighLow(Command):
             self.bot.db.commit()
             res = self.bot.db.execute("SELECT karma FROM karma WHERE target = ?", (nick,))
             karma = res.fetchone()[0]
+            username = get_honorific_name(self.bot.db, self.bot.user.full_name, self.bot.conversation.id_)
             if change < 0:
-                self.bot.say('Took {} karma from {}, total: {}.'.format(abs(change), nick, karma))
+                self.bot.say('Took {} karma from {}, total: {}.'.format(abs(change), username, karma))
             else:
-                self.bot.say('Gave {} karma to {}, total: {}.'.format(change, nick, karma))
+                self.bot.say('Gave {} karma to {}, total: {}.'.format(change, username, karma))
         except Exception as error:
             self.bot.log.warn("Error in Play High Low:\n{}".format(error))

@@ -72,18 +72,28 @@ class ChangeKarma(Command):
             self.bot.log.info('Executing Change Karma')
             for target in self.cmd_args['inc']:
                 can_change = self._change_karma(target, 1)
+                update_honorifics(self.bot.db, self.bot.conversation.id_)
                 if not can_change:
                     self.bot.say('Bitch, be cool! Stop spamming me with karma')
                 else:
+                    username = target
+                    if target in get_users(self.bot.db):
+                        username = resolve_nick(target)
+                        username = get_honorific_name(self.bot.db, username, self.bot.conversation.id_)
                     karma = get_karma(self.bot.db, target)
-                    self.bot.say('Gave karma to {}, total: {}'.format(target, karma))
+                    self.bot.say('Gave karma to {}, total: {}'.format(username, karma))
             for target in self.cmd_args['dec']:
                 can_change = self._change_karma(target, -1)
+                update_honorifics(self.bot.db, self.bot.conversation.id_)
                 if not can_change:
                     self.bot.say('Bitch, be cool! Stop spamming me with karma')
                 else:
                     karma = get_karma(self.bot.db, target)
-                    self.bot.say('Took karma from {}, total: {}'.format(target, karma))
+                    username = target
+                    if target in get_users(self.bot.db):
+                        username = resolve_nick(target)
+                        username = get_honorific_name(self.bot.db, username, self.bot.conversation.id_)
+                    self.bot.say('Took karma from {}, total: {}'.format(username, karma))
         except Exception as error:
             self.bot.log.warn('Error in Change Karma:\n{}'.format(error))
 
@@ -225,6 +235,8 @@ class Spot(Command):
             lender = resolve_nick(self.bot.db, self.bot.user.full_name)
             borrower = resolve_alias(self.bot.db, self.cmd_args['borrower'])
             amount = int(self.cmd_args['amount'])
+            borrower_username = resolve_full(self.bot.db, borrower)
+            borrower_username = get_honorific_name(self.bot.db, borrower_username, self.bot.conversation.id_)
             # Check to make sure the loan isn't invalid
             if amount > get_karma(self.bot.db, lender):
                 self.bot.say("You're a bit too generous, friend. Don't lend what you don't have.")
@@ -255,7 +267,7 @@ class Spot(Command):
                 else: # Partial payment
                     self.bot.db.execute("UPDATE debt SET amount = amount - ? WHERE lender = ? AND borrower = ?", (amount, borrower, lender,))
                     self.bot.db.commit()
-                    self.bot.say("Gave {} karma to {}. You now owe them {} karma".format(amount, borrower, current_debt - amount))
+                    self.bot.say("Gave {} karma to {}. You now owe them {} karma".format(amount, borrower_username, current_debt - amount))
                     # Get subtract the given karma before we return
                     self.bot.db.execute("UPDATE karma SET karma = karma - ? WHERE target = ?", (amount, lender,))
                     self.bot.db.commit()
@@ -268,7 +280,7 @@ class Spot(Command):
             self.bot.db.execute("UPDATE karma SET karma = karma - ? WHERE target = ?", (change, lender,))
             self.bot.db.execute("UPDATE karma SET karma = karma + ? WHERE target = ?", (change, borrower,))
             self.bot.db.commit()
-            self.bot.say("Spotted {} {} karma, they now owe you {}".format(borrower, amount, total_debt))
+            self.bot.say("Spotted {} {} karma, they now owe you {}".format(borrower_username, amount, total_debt))
         except Exception as error:
             self.bot.log.warn('Error in Spot:\n{}'.format(error))
 

@@ -11,6 +11,7 @@ import inspect
 
 from hangups.bot.commands.command import Command
 from hangups.bot.commands import *
+from hangups.bot.commands.util import update_honorifics
 
 class Gambit:
     """ Gambit Hangouts Bot
@@ -51,9 +52,10 @@ class Gambit:
             self.db = sqlite3.connect(self.bot_src + 'gambit.db')
             # Specify our initial state
             self.karma = {}
+            self.update_users(conversation_list.get_all())
             for conversation in conversation_list.get_all():
                 self.karma[conversation.id_] = True
-            self.update_users(conversation_list.get_all())
+                update_honorifics(self.db, conversation.id_)
             self.client = client
             self.conv_list = conversation_list
             # Add our commands to the command list

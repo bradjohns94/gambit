@@ -4,6 +4,7 @@ CREATE TABLE users (
     full_name TEXT NOT NULL,
     nickname TEXT,
     privilege INTEGER DEFAULT 0,
+    title TEXT,
     PRIMARY KEY(user_id, conversation_id),
     UNIQUE (user_id, conversation_id, nickname)
 );

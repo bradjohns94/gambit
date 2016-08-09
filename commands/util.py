@@ -73,3 +73,40 @@ def get_privilege(db, user, conversation):
         if privilege[0].lower() == user.lower():
             return int(privilege[1])
     return 0
+
+
+def update_honorifics(db, conversation_id, threshold=75):
+    """ Update Honorifics
+        Figure out the karma-based honorifics of each conversation and apply them in the database
+        clearing out all other changes
+    """
+    db.execute("UPDATE users SET title = NULL WHERE title = 'King' OR title = 'Lord'")
+    res = db.execute("SELECT target, karma FROM users INNER JOIN karma ON " \
+            + "users.nickname = karma.target COLLATE NOCASE " \
+            + "WHERE conversation_id = ? AND karma > ? ORDER BY karma DESC", 
+            (conversation_id, threshold,))
+    ordered = res.fetchall()
+    if len(ordered) < 2: return # You're always king of a one-on-one, so forget it
+    # First give everyone who has earned their lordship their title
+    for user, karma in ordered:
+        db.execute("UPDATE users SET title = 'Lord' WHERE nickname = ? " \
+                + "AND conversation_id = ?", (user, conversation_id,))
+    # Now give the king their rightful crown, but only if they're undisputed
+    if ordered[0][1] > ordered[1][1]:
+        db.execute("UPDATE users SET title = 'King' WHERE nickname = ? " \
+                + "AND conversation_id = ?", (ordered[0][0], conversation_id,))
+    db.commit()
+
+
+def get_honorific_name(db, full_name, conversation_id):
+    """ Get Honorific Name
+        Given a user's full name determine their associated title (if they have one)
+        as well as determine their nickname and return them as their full, honorific
+        name
+    """
+    res = db.execute("SELECT title, nickname FROM users WHERE full_name = ? "
+                + "AND conversation_id = ?", (full_name, conversation_id,))
+    res = res.fetchone()
+    if not res[0]:
+        return res[1]
+    return res[0] + " " + res[1]

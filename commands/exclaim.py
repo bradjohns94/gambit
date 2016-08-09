@@ -2,6 +2,8 @@ import re
 from random import randint
 from urllib import parse, request
 from bs4 import BeautifulSoup
+
+from util import *
 from hangups.bot.commands.command import Command
 
 class SayHi(Command):
@@ -30,7 +32,8 @@ class SayHi(Command):
         try:
             self.bot.log.info("Executing Say Hi")
             greeting = self.greetings[randint(0, len(self.greetings)-1)]
-            self.bot.say("{}, {}!".format(greeting.capitalize(), self.bot.user.first_name))
+            username = get_honorific_name(self.bot.db, self.bot.user.full_name, self.bot.conversation.id_)
+            self.bot.say("{}, {}!".format(greeting.capitalize(), username))
         except Exception as error:
             self.bot.log.warn("Error in Say Hi:\n{}".format(error))
 
@@ -102,7 +105,8 @@ class Substitute(Command):
             elif last.find(before.lower() != -1):
                 msg = last.replace(self.cmd_args['before'].lower(), self.cmd_args['after'])
             if msg:
-                self.bot.say(self.bot.user.first_name + ' MEANT to say: ' + msg)
+                username = get_honorific_name(self.bot.db, self.bot.user.full_name, self.bot.conversation.id_)
+                self.bot.say(username + ' MEANT to say: ' + msg)
         except Exception as error:
             self.bot.log.warn('Error in Substitute:\n{}'.format(error))
 
