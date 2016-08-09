@@ -23,6 +23,8 @@ class AddAlias(Command):
             self.parsed = False
             return False
         self.cmd_args['old'], self.cmd_args['new'] = res.groups()
+        self.cmd_args['old'] = self.cmd_args['old'].replace('(', '').replace(')', '')
+        self.cmd_args['new'] = self.cmd_args['new'].replace('(', '').replace(')', '')
         self.parsed = True
         self.bot = bot
         self.user_priv = user_priv
@@ -71,7 +73,7 @@ class RemoveAlias(Command):
         if res is None:
             self.parsed = False
             return False
-        self.cmd_args['alias'] = res.groups()[0]
+        self.cmd_args['alias'] = res.groups()[0].replace('(', '').replace(')', '')
         self.bot = bot
         self.user_priv = user_priv
         self.parsed = True
